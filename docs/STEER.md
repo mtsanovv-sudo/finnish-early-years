@@ -59,10 +59,17 @@ Fusion, 2 GB RAM, permanently capped at **iPadOS 17.7.x**.
 - Language must be an explicit in-app setting — the device reports `en-GB`, so locale
   detection would have silently made this an English-only app.
 
+## Live
+
+**https://mtsanovv-sudo.github.io/finnish-early-years/** — GitHub Pages, public repo
+(`mtsanovv-sudo/finnish-early-years`). Open it **in Safari** on the iPad, then
+Share → Add to Home Screen. Chrome cannot install it (D9).
+
+**Every deploy: bump `CACHE` in `sw.js` first** (D10). Silent failure otherwise.
+
 ## Blocked on
 
-- **OQ2** — hosting. Needs the user's explicit yes before anything is pushed publicly.
-  Nothing else is blocked.
+Nothing. Step 3 is next.
 
 ## Standing constraints — do not drift from these
 

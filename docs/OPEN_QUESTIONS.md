@@ -12,17 +12,18 @@ One loose end, non-blocking: the probe log proves Daria *played*, not that she *
 to a 4-year-old*. Worth the user's ear at some point. If Daria grates, the fallback is already
 identified (parent-recorded prompts — `MediaRecorder` is available on the device).
 
-## OQ2 — Where does the app get hosted? **[BLOCKING install]**
-A PWA needs an HTTPS origin; LAN HTTP is not a secure context, so a service worker will not
-register off a local dev server on the iPad.
+## ~~OQ2 — Where does the app get hosted?~~ **RESOLVED 2026-08-16 → D11**
+**GitHub Pages, public repo**, on the user's explicit instruction.
+→ https://mtsanovv-sudo.github.io/finnish-early-years/
 
-`gh` is authenticated locally, so **GitHub Pages** works.
-Caveat: Pages on a *private* repo requires a paid plan, so the free path publishes the repo
-**publicly**. That is fine for the code and **not** fine for any child data (D5) — but it
-needs the user's explicit yes before anything is pushed.
+The code is public; **the child's data is not and never will be** — it lives only in the
+iPad's IndexedDB, and `.gitignore` blocks backup files from ever being committed (D5).
 
-Alternatives if they'd rather not publish: Cloudflare Pages / Netlify free tier (account
-needed), or a paid GitHub plan for private Pages.
+Two privacy choices made while publishing, both reversible:
+- Commits use `mtsanovv-sudo@users.noreply.github.com`, set **repo-locally**, so the real
+  email address does not enter a public commit history and the global git config is untouched.
+- The `gh` token's scopes were removed from this file before the first push. Operational
+  detail about the user's machine, no reason for it to be public.
 
 ## OQ3 — How aggressively does iPadOS evict this PWA's storage?
 **Measured 2026-08-16:** quota is **1843.2 MB, 0.0 MB used**. Capacity is a non-issue; the
