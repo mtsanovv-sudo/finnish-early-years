@@ -91,7 +91,22 @@
       <p class="small" data-t="today_move_goal"></p>
     </div>
 
+    <div class="card">
+      <div class="row-between">
+        <h2 data-t="today_play"></h2>
+        <span class="pill" id="today-play-left"></span>
+      </div>
+      <button id="today-play" data-t="today_play_go"></button>
+      <p class="small" data-t="today_play_help"></p>
+    </div>
+
     <div class="notice" data-t="today_next"></div>
+  </section>
+
+  <!-- ================= PLAY (child-facing, full screen) ================= -->
+  <section class="view view-play" id="view-play" hidden>
+    <div id="play-stage"></div>
+    <button class="quiet play-exit" id="play-exit" data-t="today_play_exit"></button>
   </section>
 
   <!-- ================= OBSERVE (step 3) ================= -->

@@ -49,13 +49,22 @@ Seeded, banded, covering all five learning areas, weighted toward physical activ
 **Verify:** the library can fill a full week without repeating, and the movement share of
 proposed time actually hits the target. Measure it; do not assume it.
 
-## Step 5 — Child-facing games
-Bounded set: phoneme↔grapheme matching (Cyrillic **and** Latin, authored separately),
-number sense, classify/compare/rank, rhythm. Hard daily cap, default ~15 min, parent-raisable,
-and **not bypassable by a 4-year-old**.
+## Step 5 — Child-facing games ✅ done 2026-08-16 (moved ahead of steps 3–4, see D12)
+Four games in `src/play.js`, each naming its strand: first sound (L1f), how many (L4b),
+odd one out (L4a), beat (L2a). Bilingual, fully spoken, no scores or fail states.
+Picture content is emoji (`src/data/wordbank.js`), with initial sounds stored per language
+because they do not survive translation.
 
-**Verify:** the cap holds against a determined child — app restart, clock change, reinstall.
-Test it adversarially, because she will.
+**Verified adversarially, since she will be:**
+- 3 seconds of allowance left → game starts, expires mid-play to "Стига за днес", sent outside
+- Today's button then disabled; forcing a click gives no games
+- **Relaunching the app does not restore time** — the cap is stored per local date, not per session
+- Persisted total lands exactly on the cap, never past it
+- Tapping every card gives exactly one right and the rest a nudge — no fail class anywhere
+- Exiting mid-round no longer lets a stale timer repaint the game (D13)
+
+**Still unverified — needs the real device:** how it feels in a four-year-old's hands, and
+whether `Daria` is pleasant to listen to for ten minutes at a stretch.
 
 ---
 

@@ -44,8 +44,16 @@ export const STRINGS = {
   today_movement:  { bg: 'Движение днес', en: 'Movement today' },
   today_move_goal: { bg: 'Целта е 3 часа на ден, от които поне 1 час активно.',
                      en: 'The target is 3 hours a day, at least 1 of it vigorous.' },
-  today_next:      { bg: 'Дейностите се появяват тук, щом библиотеката е готова.',
-                     en: 'Activities appear here once the library is built.' },
+  today_next:      { bg: 'Дейностите извън екрана се появяват тук, щом библиотеката е готова.',
+                     en: 'Off-screen activities appear here once the library is built.' },
+
+  /* --- play --- */
+  today_play:      { bg: 'Игри',            en: 'Play' },
+  today_play_go:   { bg: 'Да поиграем',     en: 'Let’s play' },
+  today_play_exit: { bg: 'Излез',           en: 'Exit' },
+  today_play_help: { bg: 'Четири игри, водени от гласа. Спират сами, когато времето за днес свърши.',
+                     en: 'Four voice-led games. They stop on their own when today’s time runs out.' },
+  today_play_none: { bg: 'Няма време днес',  en: 'No time left today' },
 
   /* --- areas (short labels; full names live in curriculum.js) --- */
   area_short_L1:   { bg: 'Език',       en: 'Language' },

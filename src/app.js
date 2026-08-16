@@ -8,11 +8,12 @@ import { t, setLang, getLang, LANGS, auditStrings, pick } from './i18n.js';
 import * as store from './store.js';
 import * as speech from './speech.js';
 import { LEARNING_AREAS, AGE_BANDS, CONSTRAINTS, bandForAgeMonths } from './data/curriculum.js';
+import * as play from './play.js';
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-const VIEWS = ['setup', 'today', 'observe', 'plan', 'settings'];
+const VIEWS = ['setup', 'today', 'observe', 'plan', 'settings', 'play'];
 
 const state = {
   child: null,        // { name, dob }
@@ -58,8 +59,9 @@ function show (name) {
     if (el) el.hidden = v !== name;
   });
 
-  const inSetup = name === 'setup';
-  $('#tabbar').hidden = inSetup;
+  // Setup and play are both full-screen: the tab bar is a parent control and
+  // must not be sitting under a four-year-old's thumb mid-game.
+  $('#tabbar').hidden = (name === 'setup' || name === 'play');
   $$('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === name)));
 
   if (name === 'today') renderToday();
@@ -100,6 +102,17 @@ function renderToday () {
   });
 
   renderMovement();
+  renderPlayLeft();
+}
+
+function renderPlayLeft () {
+  play.minutesLeft().then(min => {
+    const pill = $('#today-play-left');
+    const go = $('#today-play');
+    pill.textContent = min > 0 ? `${min} ${t('set_minutes').split(' ')[0]}` : '0';
+    go.disabled = min <= 0;
+    go.textContent = min > 0 ? t('today_play_go') : t('today_play_none');
+  });
 }
 
 function renderMovement () {
@@ -197,6 +210,18 @@ function wireSetup () {
       store.set('child', state.child),
       store.set('lang', getLang())
     ]).then(() => show('today'));
+  });
+}
+
+function wirePlay () {
+  $('#today-play').addEventListener('click', () => {
+    speech.unlock();
+    show('play');
+    play.open($('#play-stage'), () => show('today'));
+  });
+
+  $('#play-exit').addEventListener('click', () => {
+    play.close().then(() => show('today'));
   });
 }
 
@@ -338,6 +363,7 @@ function boot () {
   wireSetup();
   wireTabs();
   wireSettings();
+  wirePlay();
 
   loadAll().then(() => {
     applyStrings();

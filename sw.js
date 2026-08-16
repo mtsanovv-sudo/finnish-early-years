@@ -16,7 +16,7 @@
  * change without bumping it, devices that already installed the app keep
  * serving the old copy and there is no user-visible symptom to warn you.
  */
-const CACHE = 'fey-v2';
+const CACHE = 'fey-v4';
 
 const PRECACHE = [
   './',
@@ -27,7 +27,9 @@ const PRECACHE = [
   './src/i18n.js',
   './src/store.js',
   './src/speech.js',
+  './src/play.js',
   './src/data/curriculum.js',
+  './src/data/wordbank.js',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png'

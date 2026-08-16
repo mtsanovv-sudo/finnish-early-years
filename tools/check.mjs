@@ -10,6 +10,13 @@ import {
   COMPETENCES, LEARNING_AREAS, AGE_BANDS, CONSTRAINTS,
   auditProvenance, auditBands, bandForAgeMonths, STRAND_COUNT
 } from '../src/data/curriculum.js';
+import {
+  WORDS, CATEGORIES, auditWords, usableSounds, withSound, withoutSound,
+  inCategory, notInCategory
+} from '../src/data/wordbank.js';
+
+// NOTE: src/play.js cannot be imported here — it touches document and
+// speechSynthesis at module scope. Its own auditPlay() runs in the browser.
 
 let failures = 0;
 
@@ -68,6 +75,32 @@ check('constraints match the sourced values', () => {
     p.push('default screen time exceeds its own ceiling');
   }
   if (CONSTRAINTS.formalInstruction.allowed !== false) p.push('formal instruction got switched on');
+  return p;
+});
+
+/* ---- word bank ---- */
+
+check('every word is complete, bilingual, and starts with its stated sound', auditWords);
+
+check('every game can actually be built from the word bank', () => {
+  const p = [];
+
+  ['bg', 'en'].forEach(lang => {
+    // first-sound needs a target with ≥1 match and ≥2 non-matches
+    const sounds = usableSounds(lang, 1);
+    if (sounds.length < 4) p.push(`${lang}: only ${sounds.length} usable initial sounds`);
+    sounds.forEach(s => {
+      if (withSound(lang, s).length < 1) p.push(`${lang}: sound "${s}" has no word`);
+      if (withoutSound(lang, s).length < 2) p.push(`${lang}: sound "${s}" has too few distractors`);
+    });
+  });
+
+  // odd-one-out needs ≥3 in a category and ≥1 outside it
+  Object.keys(CATEGORIES).forEach(cat => {
+    if (inCategory(cat).length < 3) p.push(`category "${cat}" has fewer than 3 words`);
+    if (notInCategory(cat).length < 1) p.push(`category "${cat}" has no outsiders`);
+  });
+
   return p;
 });
 

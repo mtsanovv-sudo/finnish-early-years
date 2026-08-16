@@ -114,6 +114,47 @@ announced that in Feb 2024 and **reversed it on 2024-03-01**; home-screen web ap
 intact in iOS 17.4. This device runs 17.7.11 > 17.4, so **standalone PWAs work normally here.**
 The claim was stale. Verified rather than propagated.
 
+## D12 — Games moved ahead of the observation loop
+**2026-08-16.** User feedback after installing: *"There are no games whatsoever, just voice
+when you press on the buttons."* Correct, and a fair complaint.
+
+The roadmap had games last (Step 5) because the curriculum says the screen is the small part.
+That reasoning is sound for the *product* and wrong for the *delivery order*: it meant handing
+a parent who asked for an app for their four-year-old something with nothing in it for her.
+A build order that is faithful on paper and useless in the hand is not faithful.
+
+**Games moved to now.** Four, each naming the strand it serves — no game ships without one:
+
+| Game | Strand | Source |
+|---|---|---|
+| Първият звук / First sound | **L1f** language awareness | "from the meanings of words towards the shapes and structures of language, including words, syllables, and phonemes" |
+| Колко са? / How many? | **L4b** number concept | "encouraged to perceive numbers and amounts in their environment" |
+| Кое не пасва? / Odd one out | **L4a** mathematical thinking | "classify, compare, and rank different things and objects" |
+| Ритъм / Beat | **L2a** musical expression | "experiences of basic beat, rhythm in words and making music with their bodies" |
+
+Held to the constraints: **no scores, no streaks, no stars, no loss states.** A wrong tap names
+what she picked and invites another go — never red, never a buzzer. Every instruction spoken,
+because she cannot read. When the daily cap runs out the app tells her to go outside, which is
+not a consolation prize but the actual national recommendation (≥3h movement/day).
+
+**Emoji as picture content**, not decoration: they render natively on iPadOS 17, weigh nothing,
+need no licence, and cannot 404 offline. The initial sound is stored per language and is not
+derivable by translation — 🍎 is "ябълка" (я) but "apple" (a); 🥕 is "морков" (м) but
+"carrot" (c). Cyrillic and Latin are separate ladders (D3), and `wordbank.js` is where that begins.
+
+## D13 — Every deferred step in a game must be cancellable
+**2026-08-16.** Games advance on timers ("right answer → next round in 1.5s"). Raw `setTimeout`
+kept running after the child tapped Exit and then fired, **redrawing a finished game over
+whatever was on screen**. Caught by testing an exit mid-round, not by reading the code.
+
+All deferred steps now route through a `later()` helper that registers its timer; `cleanup()`
+cancels every one. Any new game must use `later()`, never `setTimeout`, for flow control.
+
+**Measurement note:** the first check for this compared "does the stage still contain cards?",
+which cannot tell a stale-but-harmless DOM leftover from an actual repaint — it would have
+passed either way. The real check snapshots the stage at exit and compares after the timer
+would have fired. A check that passes whether or not the bug exists is not a check.
+
 ## D10 — Cache-first, and `CACHE` in `sw.js` gets bumped on every deploy
 **2026-08-16.** The app serves from cache first: it must work offline, and it must open
 instantly on a 2018 A10. The cost is that a deployed change is invisible to a device that
