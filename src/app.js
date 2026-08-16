@@ -9,6 +9,7 @@ import * as store from './store.js';
 import * as speech from './speech.js';
 import { LEARNING_AREAS, AGE_BANDS, CONSTRAINTS, bandForAgeMonths } from './data/curriculum.js';
 import * as play from './play.js';
+import { suggestionsFor } from './data/activities.js';
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => Array.from(document.querySelectorAll(sel));
@@ -48,6 +49,9 @@ function formatAge (months) {
 
 function applyStrings () {
   $$('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  // The two stubs say what they will become, rather than sitting blank.
+  $('#observe-soon').textContent = t('soon_observe');
+  $('#plan-soon').textContent = t('soon_plan');
   document.documentElement.setAttribute('lang', getLang());
 }
 
@@ -103,6 +107,49 @@ function renderToday () {
 
   renderMovement();
   renderPlayLeft();
+  renderActivities(band);
+}
+
+/**
+ * Today's off-screen activities. Deterministic on the date, so the list does
+ * not reshuffle every time the app is opened.
+ */
+function renderActivities (band) {
+  const wrap = $('#today-activities');
+  wrap.innerHTML = '';
+  const lang = getLang();
+
+  suggestionsFor(todayKey(), band ? band.id : null, 3).forEach(act => {
+    const area = LEARNING_AREAS[act.area];
+
+    const card = document.createElement('div');
+    card.className = `act act-${act.area}`;
+
+    const head = document.createElement('div');
+    head.className = 'act-head';
+    head.innerHTML =
+      `<span class="act-dot"></span>` +
+      `<strong class="act-title">${act[lang].title}</strong>` +
+      `<span class="act-meta">${act.minutes}′` +
+      (act.outdoor ? ` · ${t('act_outdoor')}` : '') +
+      (act.movement ? ` · ${t('act_moves')}` : '') + `</span>`;
+    card.appendChild(head);
+
+    const how = document.createElement('p');
+    how.className = 'act-how';
+    how.textContent = act[lang].how;
+    card.appendChild(how);
+
+    const foot = document.createElement('p');
+    foot.className = 'act-foot';
+    foot.innerHTML =
+      `<span><b>${t('act_materials')}:</b> ${act.materials[lang]}</span>` +
+      `<span><b>${t('act_look')}:</b> ${act.look[lang]}</span>` +
+      `<span class="act-area">${area ? pick(area, '') : act.area}</span>`;
+    card.appendChild(foot);
+
+    wrap.appendChild(card);
+  });
 }
 
 function renderPlayLeft () {
@@ -115,13 +162,25 @@ function renderPlayLeft () {
   });
 }
 
+/**
+ * Reads storage rather than the in-memory copy.
+ *
+ * The Move! game credits minutes by writing straight to the store, so an
+ * in-memory `state.movement` goes stale the moment she finishes it — the number
+ * was correctly saved and the meter showed the old one. Read the source of
+ * truth here and the meter cannot drift from it, whoever did the writing.
+ */
 function renderMovement () {
-  const done = state.movement[todayKey()] || 0;
   const goal = CONSTRAINTS.dailyMovementMinutes.total;
-  const pct = Math.min(100, Math.round((done / goal) * 100));
 
-  $('#today-move-num').textContent = `${Math.floor(done / 60)}h ${done % 60}m / ${goal / 60}h`;
-  $('#today-move-bar').style.width = pct + '%';
+  return store.get('movement').then(m => {
+    state.movement = m || {};
+    const done = state.movement[todayKey()] || 0;
+    const pct = Math.min(100, Math.round((done / goal) * 100));
+
+    $('#today-move-num').textContent = `${Math.floor(done / 60)}h ${done % 60}m / ${goal / 60}h`;
+    $('#today-move-bar').style.width = pct + '%';
+  });
 }
 
 function renderSettings () {
@@ -326,10 +385,14 @@ function wireMovement () {
     b.style.flex = '1';
     b.textContent = `+${min}m`;
     b.addEventListener('click', () => {
-      const k = todayKey();
-      state.movement[k] = (state.movement[k] || 0) + min;
-      store.set('movement', state.movement);
-      renderMovement();
+      // Re-read before writing: the game may have credited minutes since the
+      // last render, and a blind write would silently discard them.
+      store.get('movement').then(m => {
+        const next = m || {};
+        const k = todayKey();
+        next[k] = (next[k] || 0) + min;
+        return store.set('movement', next);
+      }).then(renderMovement);
     });
     row.appendChild(b);
   });

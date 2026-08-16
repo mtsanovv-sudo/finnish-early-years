@@ -44,8 +44,16 @@ export const STRINGS = {
   today_movement:  { bg: 'Движение днес', en: 'Movement today' },
   today_move_goal: { bg: 'Целта е 3 часа на ден, от които поне 1 час активно.',
                      en: 'The target is 3 hours a day, at least 1 of it vigorous.' },
-  today_next:      { bg: 'Дейностите извън екрана се появяват тук, щом библиотеката е готова.',
-                     en: 'Off-screen activities appear here once the library is built.' },
+  today_activities:     { bg: 'Днешните дейности', en: 'Today’s activities' },
+  today_activities_sub: { bg: 'без екран',         en: 'off the screen' },
+  act_materials:        { bg: 'Нужно',             en: 'You need' },
+  act_look:             { bg: 'Наблюдавайте',      en: 'Watch for' },
+  act_outdoor:          { bg: 'навън',             en: 'outdoors' },
+  act_moves:            { bg: 'движение',          en: 'movement' },
+  soon_observe:         { bg: 'Тук ще записвате какво е правила и какво я е увлякло. Тези бележки ще определят нивото ѝ по всяка област — не възрастта.',
+                          en: 'This is where you will record what she did and what held her. Those notes will set her level in each area — not her age.' },
+  soon_plan:            { bg: 'Тук ще се вижда къде е тя по всяка от петте области, според вашите наблюдения.',
+                          en: 'This will show where she stands in each of the five areas, built from your observations.' },
 
   /* --- play --- */
   today_play:      { bg: 'Игри',            en: 'Play' },

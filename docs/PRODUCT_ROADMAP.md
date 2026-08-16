@@ -41,13 +41,24 @@ per learning area from that evidence and proposes the next activities.
 and that the proposed activities change as a result. A placement that does not move when the
 evidence moves is a dead mechanism, however green the tests are.
 
-## Step 4 — Off-screen activity library
-Seeded, banded, covering all five learning areas, weighted toward physical activity
-(≥3h/day target). Each activity: materials, duration, learning area + competence tags, and
-**what to look for afterwards** — which is what feeds Step 3.
+## Step 4 — Off-screen activity library ✅ done 2026-08-16
+`src/data/activities.js` — **38 activities**, all five areas, every one carrying materials,
+duration, area/strand tags and **what to look for afterwards** (the input to Step 3).
 
-**Verify:** the library can fill a full week without repeating, and the movement share of
-proposed time actually hits the target. Measure it; do not assume it.
+Measured rather than asserted — `tools/check.mjs` prints the real distribution:
+
+```
+L1  7 · L2  7 · L3  6 · L4  8 · L5 10
+movement 21/38 (55%) · outdoor 16/38 (42%)
+```
+
+Three suggestions a day, **deterministic on the date** so the list does not reshuffle every
+time the app is opened, and **at least one always moves her** — enforced, not hoped for,
+because "weighted toward movement" is not the same as "guaranteed on a rainy Tuesday".
+
+**Known gap, reported not hidden:** bands `b1_2` and `b6_7` have **no dedicated activities**;
+they fall back to the whole library. Her band (`b4`) has all 38. The check prints per-band
+counts so this cannot quietly become invisible.
 
 ## Step 5 — Child-facing games ✅ done 2026-08-16 (moved ahead of steps 3–4, see D12)
 Four games in `src/play.js`, each naming its strand: first sound (L1f), how many (L4b),

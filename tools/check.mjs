@@ -15,6 +15,9 @@ import {
   inCategory, notInCategory
 } from '../src/data/wordbank.js';
 
+import { auditPlaysets } from '../src/data/playsets.js';
+import { ACTIVITIES, auditActivities, suggestionsFor, ACTIVITY_COUNT } from '../src/data/activities.js';
+
 // NOTE: src/play.js cannot be imported here — it touches document and
 // speechSynthesis at module scope. Its own auditPlay() runs in the browser.
 
@@ -104,6 +107,41 @@ check('every game can actually be built from the word bank', () => {
   return p;
 });
 
+/* ---- playsets ---- */
+
+check('emotions, shapes, colours and moves are complete', auditPlaysets);
+
+/* ---- activity library ---- */
+
+check('every activity is tagged, bilingual, and says what to look for', auditActivities);
+
+check('daily suggestions are stable and always include movement', () => {
+  const p = [];
+  const day = '2026-08-16';
+
+  // Same day + same band must give the same three, or the plan reshuffles
+  // every time the app is opened.
+  const a = suggestionsFor(day, 'b4', 3).map(x => x.id).join(',');
+  const b = suggestionsFor(day, 'b4', 3).map(x => x.id).join(',');
+  if (a !== b) p.push(`suggestions are not stable within a day: ${a} vs ${b}`);
+
+  // Different days should generally differ, or every day looks identical.
+  const other = suggestionsFor('2026-08-17', 'b4', 3).map(x => x.id).join(',');
+  if (a === other) p.push('two different days produced an identical list');
+
+  // Every day, in every band, must offer something that moves her.
+  ['b1_2', 'b3', 'b4', 'b5', 'b6_7'].forEach(band => {
+    for (let d = 1; d <= 28; d++) {
+      const key = `2026-09-${String(d).padStart(2, '0')}`;
+      const picks = suggestionsFor(key, band, 3);
+      if (picks.length !== 3) p.push(`${band} ${key}: got ${picks.length} suggestions, wanted 3`);
+      if (!picks.some(x => x.movement)) p.push(`${band} ${key}: no movement activity offered`);
+    }
+  });
+
+  return p;
+});
+
 /* ---- the audits themselves must be able to fail ---- */
 
 check('auditBands detects a mislabelled band', () => {
@@ -124,6 +162,28 @@ check('auditProvenance detects a lost citation', () => {
   return caught ? [] : ['auditProvenance is blind to a missing src'];
 });
 
-console.log(`\n${STRAND_COUNT} strands · ${AGE_BANDS.length} bands`);
+/* ---- coverage, reported rather than silently filled in ----
+   suggestionsFor() falls back to the whole library when a band has no
+   activities of its own. That keeps the app working, but it would let a band
+   sit empty with every check green, so the real numbers get printed. */
+
+console.log('\nactivities per learning area:');
+['L1', 'L2', 'L3', 'L4', 'L5'].forEach(area => {
+  const n = ACTIVITIES.filter(a => a.area === area).length;
+  console.log(`  ${area}  ${String(n).padStart(2)}  ${'#'.repeat(n)}`);
+});
+
+const movers = ACTIVITIES.filter(a => a.movement).length;
+const outdoor = ACTIVITIES.filter(a => a.outdoor).length;
+console.log(`\nmovement: ${movers}/${ACTIVITY_COUNT} (${Math.round(movers / ACTIVITY_COUNT * 100)}%)` +
+            ` · outdoor: ${outdoor}/${ACTIVITY_COUNT} (${Math.round(outdoor / ACTIVITY_COUNT * 100)}%)`);
+
+console.log('\nactivities written for each band (0 = falls back to the whole library):');
+AGE_BANDS.forEach(b => {
+  const n = ACTIVITIES.filter(a => a.bands.includes(b.id)).length;
+  console.log(`  ${b.id.padEnd(5)} ${String(n).padStart(2)}  ${b.en}${n === 0 ? '   <- no dedicated content' : ''}`);
+});
+
+console.log(`\n${STRAND_COUNT} strands · ${AGE_BANDS.length} bands · ${WORDS.length} words · ${ACTIVITY_COUNT} activities`);
 console.log(failures ? `${failures} FAILED` : 'all checks passed');
 process.exit(failures ? 1 : 0);

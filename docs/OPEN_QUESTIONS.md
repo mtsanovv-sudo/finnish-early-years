@@ -47,6 +47,14 @@ it will keep running on this device as long as the device boots, and it will mov
 replacement iPad by opening a URL. Worth revisiting only if Apple drops 17.7.x security
 support while the daughter is still using it.
 
+## OQ8 — Activity library has no content for bands `b1_2` and `b6_7`
+`suggestionsFor()` falls back to the whole library when a band has nothing of its own, so the
+app works — but a 1-year-old would be offered box-building and a 6-year-old would be offered
+toddler content. Her band (`b4`) is fully covered, so this is not urgent; `tools/check.mjs`
+prints per-band counts so it cannot become invisible.
+
+Worth writing before she turns 6, or sooner if a younger sibling ever uses it.
+
 ## OQ5 — Does the daughter have any Cyrillic/Latin exposure already?
 Affects where the L1 literacy ladder starts, and whether the two alphabets should be
 introduced together or staged. Not blocking — the observation loop will answer it empirically

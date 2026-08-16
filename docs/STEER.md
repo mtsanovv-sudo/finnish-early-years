@@ -30,9 +30,9 @@ games sits on top, behind a hard daily time cap.
 | **0 · iPad capability probe** | ✅ done — reported and acted on (D7, D8, D9) |
 | 1 · Curriculum data model | ✅ done — `src/data/curriculum.js` |
 | 2 · PWA shell (bilingual, offline, installable) | ✅ done — needs on-device install test |
-| **5 · Child-facing games + daily cap** | ✅ done — **moved ahead** of 3 and 4 on user feedback (D12) |
-| 3 · Observation → plan loop | ⬜ next |
-| 4 · Off-screen activity library | ⬜ |
+| **5 · Child-facing games + daily cap** | ✅ done — **8 games**, moved ahead of 3 and 4 (D12) |
+| **4 · Off-screen activity library** | ✅ done — **38 activities**, 55% movement, 42% outdoor |
+| 3 · Observation → plan loop | ⬜ next — the last piece, and the one that makes it hers |
 
 **Step 1 as built:** 6 competences × 5 learning areas × 23 strands, bilingual, every node
 carrying a `src` citation. Sourced material and our own constructions are separated by a

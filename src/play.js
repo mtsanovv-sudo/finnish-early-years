@@ -23,6 +23,9 @@ import {
   WORDS, CATEGORIES, NUMBER_WORDS, usableSounds, withSound, withoutSound,
   inCategory, notInCategory, sample, shuffle, auditWords
 } from './data/wordbank.js';
+import {
+  EMOTIONS, SHAPES, COLOURS, MOVES, shapeSvg, auditPlaysets
+} from './data/playsets.js';
 
 /* ============================ text ============================ */
 
@@ -47,6 +50,14 @@ export const PLAY_TEXT = {
   g_odd_sub:    { bg: 'Подреждаме по групи',   en: 'Sorting into groups' },
   g_beat:       { bg: 'Ритъм',                 en: 'Beat' },
   g_beat_sub:   { bg: 'Тупкай заедно с музиката', en: 'Tap along with the music' },
+  g_feel:       { bg: 'Как се чувства?',       en: 'How do they feel?' },
+  g_feel_sub:   { bg: 'Разпознаваме чувствата', en: 'Naming feelings' },
+  g_shape:      { bg: 'Форми и цветове',       en: 'Shapes and colours' },
+  g_shape_sub:  { bg: 'Гледаме внимателно',    en: 'Looking closely' },
+  g_size:       { bg: 'Голямо и малко',        en: 'Big and small' },
+  g_size_sub:   { bg: 'Сравняваме и подреждаме', en: 'Comparing and ordering' },
+  g_move:       { bg: 'Движи се!',             en: 'Move!' },
+  g_move_sub:   { bg: 'Ставай от стола',       en: 'Get off the chair' },
 
   ask_sound:    { bg: s => `Намери какво започва със звука ${s}`,
                   en: s => `Find what starts with the sound ${s}` },
@@ -60,7 +71,24 @@ export const PLAY_TEXT = {
   odd_because:  { bg: (w, c) => `Да! ${w} не е ${c}.`,
                   en: (w, c) => `Yes! A ${w} is not ${c}.` },
   odd_retry:    { bg: (w, c) => `${w} е ${c}. Опитай пак.`,
-                  en: (w, c) => `A ${w} is ${c}. Try again.` }
+                  en: (w, c) => `A ${w} is ${c}. Try again.` },
+
+  ask_feel:     { bg: e => `Кой е ${e}?`,       en: e => `Who is ${e}?` },
+  yes_feel:     { bg: e => `Да! Този е ${e}.`,  en: e => `Yes! That one is ${e}.` },
+  no_feel:      { bg: e => `Този е ${e}. Опитай пак.`,
+                  en: e => `That one is ${e}. Try again.` },
+
+  ask_shape:    { bg: s => `Намери ${s}`,       en: s => `Find the ${s}` },
+  ask_colour:   { bg: c => `Намери ${c}`,       en: c => `Find the ${c} one` },
+  yes_plain:    { bg: () => 'Да! Браво!',       en: () => 'Yes! Well done!' },
+  no_plain:     { bg: () => 'Опитай пак.',      en: () => 'Try again.' },
+
+  ask_biggest:  { bg: () => 'Кое е най-голямо?', en: () => 'Which is the biggest?' },
+  ask_smallest: { bg: () => 'Кое е най-малко?',  en: () => 'Which is the smallest?' },
+
+  move_done:    { bg: 'Готово!',                en: 'Done!' },
+  move_praise:  { bg: () => 'Браво! Още едно.',  en: () => 'Well done! One more.' },
+  move_end:     { bg: 'Ти се движи! Това се брои.', en: 'You moved! That counts.' }
 };
 
 const T = key => {
@@ -437,6 +465,248 @@ function gameBeat () {
   activeCleanup = stopBeat;
 }
 
+/* ============================ game 5: feelings ============================ */
+/* Curriculum: §2.7 T3 — "Children's emotional skills improve as they practise
+   perceiving, acknowledging, and naming emotions." Also §4.5 L3a, which names
+   "causes of fear, sadness, and joy" among the themes to reflect on together. */
+
+function gameFeelings () {
+  const lang = getLang();
+  let round = 0;
+  const ROUNDS = 6;
+
+  function nextRound () {
+    if (round >= ROUNDS) return finish(gameFeelings);
+    round++;
+
+    const picked = sample(EMOTIONS, 3);
+    const target = picked[Math.floor(Math.random() * picked.length)];
+
+    clear();
+    stage.appendChild(progressDots(round, ROUNDS));
+    stage.appendChild(el('p', 'play-ask', PLAY_TEXT.ask_feel[lang](target[lang])));
+    speakNow(PLAY_TEXT.ask_feel[lang](target[lang]));
+
+    const row = el('div', 'play-cards');
+    shuffle(picked).forEach(face => {
+      const b = el('button', 'play-card');
+      b.type = 'button';
+      b.appendChild(el('span', 'play-emoji', face.emoji));
+      b.addEventListener('click', () => {
+        if (face === target) {
+          b.classList.add('is-right');
+          speakNow(PLAY_TEXT.yes_feel[lang](face[lang]));
+          later(nextRound, 1600);
+        } else {
+          // Name what she saw. Being wrong about a feeling is still learning one.
+          b.classList.add('is-nudge');
+          speakNow(PLAY_TEXT.no_feel[lang](face[lang]));
+          later(() => b.classList.remove('is-nudge'), 900);
+        }
+      });
+      row.appendChild(b);
+    });
+    stage.appendChild(row);
+  }
+
+  nextRound();
+}
+
+/* ======================= game 6: shapes and colours ======================= */
+/* Curriculum: §4.5 L4c — "encouraged to examine objects and shapes and to play
+   with them", strengthening geometric thinking; and §4.5 L2b, where attention
+   is paid to "colours, shapes, materials". Alternates the two questions so she
+   has to notice WHICH property is being asked about. */
+
+function gameShapes () {
+  const lang = getLang();
+  let round = 0;
+  const ROUNDS = 6;
+
+  function nextRound () {
+    if (round >= ROUNDS) return finish(gameShapes);
+    round++;
+
+    const askColour = round % 2 === 0;
+    let items, target, prompt;
+
+    if (askColour) {
+      // Same shape throughout, three colours: only colour can distinguish them.
+      const shape = sample(SHAPES, 1)[0];
+      const cols = sample(COLOURS, 3);
+      items = cols.map(c => ({ shape, colour: c }));
+      target = items[Math.floor(Math.random() * items.length)];
+      prompt = PLAY_TEXT.ask_colour[lang](target.colour[lang]);
+    } else {
+      // Same colour throughout, three shapes: only shape can distinguish them.
+      const colour = sample(COLOURS, 1)[0];
+      const shapes = sample(SHAPES, 3);
+      items = shapes.map(s => ({ shape: s, colour }));
+      target = items[Math.floor(Math.random() * items.length)];
+      prompt = PLAY_TEXT.ask_shape[lang](target.shape[lang]);
+    }
+
+    clear();
+    stage.appendChild(progressDots(round, ROUNDS));
+    stage.appendChild(el('p', 'play-ask', prompt));
+    speakNow(prompt);
+
+    const row = el('div', 'play-cards');
+    shuffle(items).forEach(item => {
+      const b = el('button', 'play-card');
+      b.type = 'button';
+      const holder = el('span', 'play-shape');
+      holder.innerHTML = shapeSvg(item.shape.id, item.colour.hex, 92);
+      b.appendChild(holder);
+      b.addEventListener('click', () => {
+        if (item === target) {
+          b.classList.add('is-right');
+          speakNow(PLAY_TEXT.yes_plain[lang]());
+          later(nextRound, 1300);
+        } else {
+          b.classList.add('is-nudge');
+          speakNow(PLAY_TEXT.no_plain[lang]());
+          later(() => b.classList.remove('is-nudge'), 900);
+        }
+      });
+      row.appendChild(b);
+    });
+    stage.appendChild(row);
+  }
+
+  nextRound();
+}
+
+/* ======================= game 7: big and small ======================= */
+/* Curriculum: §4.5 L4a — "classify, compare, and rank different things and
+   objects". Same object at three sizes, so size is the only variable. */
+
+function gameBigSmall () {
+  const lang = getLang();
+  let round = 0;
+  const ROUNDS = 6;
+
+  function nextRound () {
+    if (round >= ROUNDS) return finish(gameBigSmall);
+    round++;
+
+    const item = sample(WORDS, 1)[0];
+    const scales = shuffle([0.55, 1, 1.6]);
+    const wantBiggest = round % 2 === 1;
+    const targetScale = wantBiggest ? 1.6 : 0.55;
+    const prompt = wantBiggest ? PLAY_TEXT.ask_biggest[lang]() : PLAY_TEXT.ask_smallest[lang]();
+
+    clear();
+    stage.appendChild(progressDots(round, ROUNDS));
+    stage.appendChild(el('p', 'play-ask', prompt));
+    speakNow(prompt);
+
+    const row = el('div', 'play-cards');
+    scales.forEach(scale => {
+      const b = el('button', 'play-card play-card-size');
+      b.type = 'button';
+      const e = el('span', 'play-emoji', item.emoji);
+      e.style.fontSize = Math.round(64 * scale) + 'px';
+      b.appendChild(e);
+      b.addEventListener('click', () => {
+        if (scale === targetScale) {
+          b.classList.add('is-right');
+          speakNow(PLAY_TEXT.yes_plain[lang]());
+          later(nextRound, 1300);
+        } else {
+          b.classList.add('is-nudge');
+          speakNow(PLAY_TEXT.no_plain[lang]());
+          later(() => b.classList.remove('is-nudge'), 900);
+        }
+      });
+      row.appendChild(b);
+    });
+    stage.appendChild(row);
+  }
+
+  nextRound();
+}
+
+/* ============================ game 8: move! ============================ */
+/* Curriculum: §4.5 L5a — "balance, locomotor, and manipulative" skills.
+   The only game whose purpose is to get her off the seat. The mix is drawn
+   across all three named skills rather than being eight kinds of jumping, and
+   the time spent is credited to today's movement, because it genuinely was. */
+
+function gameMove () {
+  const lang = getLang();
+  const SEQUENCE = 8;
+  let step = 0;
+  let picks = [];
+
+  // One from each skill first, so no run is all jumping, then fill the rest.
+  const bySkill = ['balance', 'locomotor', 'manipulative']
+    .map(sk => sample(MOVES.filter(m => m.skill === sk), 1)[0])
+    .filter(Boolean);
+  const rest = sample(MOVES.filter(m => !bySkill.includes(m)), SEQUENCE - bySkill.length);
+  picks = shuffle([...bySkill, ...rest]);
+
+  function nextMove () {
+    if (step >= picks.length) return finishMove();
+    const move = picks[step];
+    step++;
+
+    clear();
+    stage.appendChild(progressDots(step, picks.length));
+
+    const card = el('div', 'play-move');
+    card.appendChild(el('div', 'play-emoji play-emoji-xl', move.emoji));
+    card.appendChild(el('p', 'play-ask', move[lang]));
+    stage.appendChild(card);
+    speakNow(move[lang]);
+
+    const done = el('button', 'play-bigbutton', T('move_done'));
+    done.type = 'button';
+    done.addEventListener('click', () => {
+      if (step < picks.length) speakNow(PLAY_TEXT.move_praise[lang]());
+      later(nextMove, 700);
+    });
+    const row = el('div', 'play-actions');
+    row.appendChild(done);
+    stage.appendChild(row);
+  }
+
+  function finishMove () {
+    // Credit the movement. Roughly 15s per prompt including doing it — kept
+    // deliberately conservative so the day's meter is not inflated by the app.
+    const minutes = Math.max(1, Math.round((picks.length * 15) / 60));
+    creditMovement(minutes).then(() => {
+      clear();
+      const box = el('div', 'play-done');
+      box.appendChild(el('div', 'play-emoji play-emoji-xl', '💪'));
+      box.appendChild(el('h2', null, T('finished')));
+      box.appendChild(el('p', 'muted', `${T('move_end')} +${minutes} ${T('min')}`));
+      stage.appendChild(box);
+      speakNow(T('move_end'));
+
+      const row = el('div', 'play-actions');
+      const again = el('button', null, T('again'));
+      again.type = 'button';
+      again.addEventListener('click', () => guard(() => gameMove()));
+      const back = el('button', 'ghost', T('back'));
+      back.type = 'button';
+      back.addEventListener('click', showChooser);
+      row.appendChild(again); row.appendChild(back);
+      stage.appendChild(row);
+    });
+  }
+
+  nextMove();
+}
+
+function creditMovement (minutes) {
+  return store.get('movement').then(m => {
+    const next = m || {};
+    next[dayKey()] = (next[dayKey()] || 0) + minutes;
+    return store.set('movement', next);
+  });
+}
+
 /* ============================ shell ============================ */
 
 let activeCleanup = null;
@@ -454,7 +724,11 @@ const GAMES = [
   { id: 'sound', strand: 'L1f', icon: '🔤', title: 'g_sound', sub: 'g_sound_sub', run: gameFirstSound },
   { id: 'count', strand: 'L4b', icon: '🔢', title: 'g_count', sub: 'g_count_sub', run: gameHowMany },
   { id: 'odd',   strand: 'L4a', icon: '🧩', title: 'g_odd',   sub: 'g_odd_sub',   run: gameOddOneOut },
-  { id: 'beat',  strand: 'L2a', icon: '🥁', title: 'g_beat',  sub: 'g_beat_sub',  run: gameBeat }
+  { id: 'beat',  strand: 'L2a', icon: '🥁', title: 'g_beat',  sub: 'g_beat_sub',  run: gameBeat },
+  { id: 'feel',  strand: 'T3',  icon: '💛', title: 'g_feel',  sub: 'g_feel_sub',  run: gameFeelings },
+  { id: 'shape', strand: 'L4c', icon: '🔷', title: 'g_shape', sub: 'g_shape_sub', run: gameShapes },
+  { id: 'size',  strand: 'L4a', icon: '📏', title: 'g_size',  sub: 'g_size_sub',  run: gameBigSmall },
+  { id: 'move',  strand: 'L5a', icon: '🤸', title: 'g_move',  sub: 'g_move_sub',  run: gameMove }
 ];
 
 function finish (rerun) {
@@ -561,7 +835,7 @@ export function minutesLeft () {
 
 /** Every game must name a real curriculum strand, and every text must be bilingual. */
 export function auditPlay () {
-  const problems = auditWords();
+  const problems = auditWords().concat(auditPlaysets());
 
   GAMES.forEach(g => {
     if (!g.strand) problems.push(`game ${g.id} names no curriculum strand`);

@@ -155,6 +155,20 @@ which cannot tell a stale-but-harmless DOM leftover from an actual repaint — i
 passed either way. The real check snapshots the stage at exit and compares after the timer
 would have fired. A check that passes whether or not the bug exists is not a check.
 
+## D14 — Read storage, not an in-memory copy, wherever two writers exist
+**2026-08-16.** The Move! game credits movement minutes by writing to the store. `renderMovement()`
+read `state.movement`, app.js's in-memory copy — so the minutes **were saved correctly and the
+meter showed the old number.** The value moved; the instrument did not.
+
+Worse, the manual `+15m` button then wrote `state.movement` back, which would have **silently
+discarded** the game's credit.
+
+Both fixed by making the meter read the store on every render, and the button re-read before
+writing. Rule: **when more than one module can write a value, nobody reads a cached copy of it.**
+
+Verified by watching the number move end to end — 1h 0m → Move! → 1h 2m → +15m → **1h 17m**.
+The last figure is the real proof: a blind write would have produced 1h 15m.
+
 ## D10 — Cache-first, and `CACHE` in `sw.js` gets bumped on every deploy
 **2026-08-16.** The app serves from cache first: it must work offline, and it must open
 instantly on a 2018 A10. The cost is that a deployed change is invisible to a device that
