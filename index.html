@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<title>Ранни години · Early Years</title>
+
+<!-- viewport-fit=cover so the tab bar can respect the home indicator area -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#14495E">
+<meta name="color-scheme" content="light dark">
+
+<!-- iOS standalone. apple-mobile-web-app-capable is what makes Add to Home
+     Screen open without Safari chrome; without it this is just a bookmark. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ранни години">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles/app.css">
+</head>
+
+<body class="no-select">
+
+<div id="app">
+
+  <!-- ================= SETUP (first run) ================= -->
+  <section class="view" id="view-setup" hidden>
+    <div class="stack" style="gap:10px">
+      <p class="eyebrow" data-t="app_name"></p>
+      <h1 data-t="setup_title"></h1>
+      <p class="muted" data-t="setup_intro"></p>
+    </div>
+
+    <div class="card">
+      <label>
+        <span data-t="setup_lang"></span>
+        <select id="setup-lang">
+          <option value="bg">Български</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+
+      <label>
+        <span data-t="setup_name"></span>
+        <input type="text" id="setup-name" autocomplete="off" autocapitalize="words">
+      </label>
+
+      <label>
+        <span data-t="setup_dob"></span>
+        <input type="date" id="setup-dob">
+      </label>
+      <p class="small" data-t="setup_dob_help"></p>
+    </div>
+
+    <button id="setup-go" data-t="setup_start"></button>
+  </section>
+
+  <!-- ================= TODAY ================= -->
+  <section class="view" id="view-today" hidden>
+    <div class="stack" style="gap:8px">
+      <p class="eyebrow"><span data-t="today_hello"></span> <span id="today-name"></span></p>
+      <h1 id="today-date"></h1>
+    </div>
+
+    <div class="card">
+      <div class="row-between">
+        <div class="stack" style="gap:2px">
+          <span class="small" data-t="today_age"></span>
+          <strong id="today-age" style="font-size:22px"></strong>
+        </div>
+        <div class="stack" style="gap:2px;text-align:right">
+          <span class="small" data-t="today_band"></span>
+          <span class="pill" id="today-band"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-t="today_areas"></h2>
+      <div class="areas" id="today-areas"></div>
+    </div>
+
+    <div class="card">
+      <div class="row-between">
+        <h2 data-t="today_movement"></h2>
+        <strong id="today-move-num" class="muted"></strong>
+      </div>
+      <div class="meter"><span id="today-move-bar"></span></div>
+      <p class="small" data-t="today_move_goal"></p>
+    </div>
+
+    <div class="notice" data-t="today_next"></div>
+  </section>
+
+  <!-- ================= OBSERVE (step 3) ================= -->
+  <section class="view" id="view-observe" hidden>
+    <div class="stack" style="gap:8px">
+      <p class="eyebrow" data-t="soon"></p>
+      <h1 data-t="nav_observe"></h1>
+    </div>
+    <div class="notice" id="observe-soon"></div>
+  </section>
+
+  <!-- ================= PLAN (step 3) ================= -->
+  <section class="view" id="view-plan" hidden>
+    <div class="stack" style="gap:8px">
+      <p class="eyebrow" data-t="soon"></p>
+      <h1 data-t="nav_plan"></h1>
+    </div>
+    <div class="notice" id="plan-soon"></div>
+  </section>
+
+  <!-- ================= SETTINGS ================= -->
+  <section class="view" id="view-settings" hidden>
+    <h1 data-t="nav_settings"></h1>
+
+    <div class="card">
+      <h2 data-t="set_language"></h2>
+      <select id="set-lang">
+        <option value="bg">Български</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h2 data-t="set_child"></h2>
+      <label>
+        <span data-t="setup_name"></span>
+        <input type="text" id="set-name" autocomplete="off">
+      </label>
+      <label>
+        <span data-t="setup_dob"></span>
+        <input type="date" id="set-dob">
+      </label>
+    </div>
+
+    <div class="card">
+      <h2 data-t="set_screen"></h2>
+      <div class="row-between">
+        <input type="number" id="set-screen" min="0" max="60" step="5" style="max-width:130px">
+        <span class="muted" data-t="set_minutes"></span>
+      </div>
+      <p class="small" data-t="set_screen_help"></p>
+    </div>
+
+    <div class="card">
+      <h2 data-t="set_voice"></h2>
+      <label>
+        <span data-t="set_voice_bg"></span>
+        <select id="set-voice-bg"></select>
+      </label>
+      <label>
+        <span data-t="set_voice_en"></span>
+        <select id="set-voice-en"></select>
+      </label>
+      <button class="ghost" id="set-voice-try" data-t="set_voice_test"></button>
+    </div>
+
+    <div class="card">
+      <h2 data-t="set_data"></h2>
+      <p class="small" data-t="set_export_help"></p>
+      <button id="set-export" data-t="set_export"></button>
+      <button class="ghost" id="set-import-btn" data-t="set_import"></button>
+      <input type="file" id="set-import" accept="application/json,.json" hidden>
+      <p class="small" id="set-storage"></p>
+    </div>
+
+    <div class="card">
+      <h2 data-t="set_install"></h2>
+      <p class="small" id="set-install-text"></p>
+    </div>
+
+    <div class="card">
+      <button class="danger" id="set-reset" data-t="set_reset"></button>
+    </div>
+  </section>
+
+  <!-- ================= TAB BAR ================= -->
+  <nav class="tabbar" id="tabbar" role="tablist" hidden>
+    <button class="tab" role="tab" data-view="today" aria-selected="true">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>
+      </svg>
+      <span data-t="nav_today"></span>
+    </button>
+    <button class="tab" role="tab" data-view="observe" aria-selected="false">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/>
+        <circle cx="12" cy="12" r="2.6"/>
+      </svg>
+      <span data-t="nav_observe"></span>
+    </button>
+    <button class="tab" role="tab" data-view="plan" aria-selected="false">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 5h16"/><path d="M4 12h10"/><path d="M4 19h13"/>
+      </svg>
+      <span data-t="nav_plan"></span>
+    </button>
+    <button class="tab" role="tab" data-view="settings" aria-selected="false">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3.2"/>
+        <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/>
+      </svg>
+      <span data-t="nav_settings"></span>
+    </button>
+  </nav>
+
+</div>
+
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+/**
+ * Built for one screen: a 9.7" iPad, 768×1024 points, portrait, 4:3.
+ * (DECISIONS.md D7.) It still has to be usable on a desktop for development,
+ * but the iPad is what it is designed to look right on.
+ *
+ * Safari 17 baseline — nothing newer. A10 Fusion / 2 GB RAM, so transforms and
+ * opacity only; no filters, no large shadows animating, no layout thrash.
+ */
+
+:root {
+  /* light — complete palette lives here so the un-stamped default resolves */
+  --ground:      #EFF3F4;
+  --surface:     #FFFFFF;
+  --surface-alt: #E4EBED;
+  --line:        #CFDADD;
+  --line-soft:   #E1E8EA;
+  --ink:         #10222A;
+  --ink-muted:   #52666D;
+  --ink-faint:   #7E9199;
+  --lake:        #14495E;
+  --lake-ink:    #FFFFFF;
+  --lake-soft:   #DEEAEF;
+  --warn:        #8A5B0E;
+  --bad:         #A6362C;
+
+  /* the five learning areas — same values as tools/make-icons.mjs */
+  --L1: #E8B03A;
+  --L2: #C8553D;
+  --L3: #8E6FA8;
+  --L4: #4FA07A;
+  --L5: #4A9BC4;
+
+  --shadow: 0 1px 2px rgba(16,34,42,.06), 0 6px 18px rgba(16,34,42,.06);
+  --radius: 14px;
+
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --tabbar: 76px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0B1418;
+    --surface:     #142127;
+    --surface-alt: #1C2C33;
+    --line:        #2A3D45;
+    --line-soft:   #21323A;
+    --ink:         #E1EAED;
+    --ink-muted:   #9AAEB5;
+    --ink-faint:   #6D8189;
+    --lake:        #4E93B0;
+    --lake-ink:    #06171F;
+    --lake-soft:   #16323F;
+    --warn:        #D9A758;
+    --bad:         #E4867B;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 18px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"] {
+  --ground:      #0B1418;
+  --surface:     #142127;
+  --surface-alt: #1C2C33;
+  --line:        #2A3D45;
+  --line-soft:   #21323A;
+  --ink:         #E1EAED;
+  --ink-muted:   #9AAEB5;
+  --ink-faint:   #6D8189;
+  --lake:        #4E93B0;
+  --lake-ink:    #06171F;
+  --lake-soft:   #16323F;
+  --warn:        #D9A758;
+  --bad:         #E4867B;
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 18px rgba(0,0,0,.28);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 18px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+/* Text selection and callouts get in a four-year-old's way. */
+.no-select { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+/* ---------- layout ---------- */
+
+#app { min-height: 100%; display: flex; flex-direction: column; }
+
+.view {
+  flex: 1;
+  padding: 28px 26px calc(var(--tabbar) + env(safe-area-inset-bottom, 0px) + 28px);
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.view[hidden] { display: none; }
+
+/* ---------- type ---------- */
+
+h1 { font-size: 30px; line-height: 1.15; font-weight: 650; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+h2 { font-size: 20px; font-weight: 650; margin: 0; letter-spacing: -.01em; }
+p  { margin: 0; }
+
+.eyebrow {
+  font-size: 12px; letter-spacing: .13em; text-transform: uppercase;
+  font-weight: 650; color: var(--ink-faint); margin: 0;
+}
+.muted { color: var(--ink-muted); font-size: 15px; }
+.small { font-size: 14px; color: var(--ink-muted); }
+
+/* ---------- cards ---------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+
+/* ---------- controls ---------- */
+
+button, .btn {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  min-height: 52px;            /* generous: small hands, and a parent in a hurry */
+  padding: 14px 22px;
+  border-radius: 11px;
+  border: 1.5px solid var(--lake);
+  background: var(--lake);
+  color: var(--lake-ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity .12s ease;
+}
+button.ghost { background: transparent; color: var(--lake); }
+button.quiet {
+  background: transparent; color: var(--ink-muted);
+  border-color: var(--line);
+}
+button.danger { background: transparent; color: var(--bad); border-color: var(--bad); }
+button:active { opacity: .65; }
+button:disabled { opacity: .4; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid var(--lake); outline-offset: 2px;
+}
+
+label { display: flex; flex-direction: column; gap: 7px; font-size: 15px; color: var(--ink-muted); }
+
+input[type="text"], input[type="date"], input[type="number"], select {
+  font: inherit;
+  font-size: 18px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 11px;
+  padding: 14px 16px;
+  min-height: 52px;
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+select {
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 20px center, right 14px center;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 44px;
+}
+
+/* ---------- the five areas ---------- */
+
+.areas { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+
+.area {
+  display: flex; flex-direction: column; align-items: center; gap: 9px;
+  padding: 16px 6px; border-radius: 12px;
+  background: var(--surface-alt);
+  text-align: center;
+}
+.area .dot {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--area, var(--lake));
+}
+.area .nm { font-size: 13px; font-weight: 600; line-height: 1.25; color: var(--ink); }
+
+.area-L1 { --area: var(--L1); }
+.area-L2 { --area: var(--L2); }
+.area-L3 { --area: var(--L3); }
+.area-L4 { --area: var(--L4); }
+.area-L5 { --area: var(--L5); }
+
+/* ---------- movement meter ---------- */
+
+.meter {
+  height: 12px; border-radius: 6px;
+  background: var(--surface-alt);
+  overflow: hidden;
+}
+.meter > span {
+  display: block; height: 100%; width: 0;
+  background: var(--L5);
+  border-radius: 6px;
+  transition: width .3s ease;
+}
+
+/* ---------- tab bar ---------- */
+
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  height: calc(var(--tabbar) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: var(--surface);
+  border-top: 1px solid var(--line-soft);
+  z-index: 10;
+}
+.tabbar[hidden] { display: none; }
+
+.tab {
+  background: none; border: 0; min-height: 0; padding: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  color: var(--ink-faint); font-size: 12px; font-weight: 600; border-radius: 0;
+}
+.tab .ic { width: 22px; height: 22px; display: block; }
+.tab[aria-selected="true"] { color: var(--lake); }
+.tab:active { opacity: .6; }
+
+/* ---------- misc ---------- */
+
+.pill {
+  display: inline-block; font-size: 12px; font-weight: 650;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--lake-soft); color: var(--lake);
+}
+
+.notice {
+  border-radius: 11px; padding: 14px 16px; font-size: 15px;
+  background: var(--lake-soft); color: var(--ink);
+  border: 1px solid var(--line-soft);
+}
+.notice.warn { background: color-mix(in srgb, var(--warn) 12%, var(--surface)); border-color: var(--warn); }
+
+hr { border: 0; border-top: 1px solid var(--line-soft); margin: 4px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

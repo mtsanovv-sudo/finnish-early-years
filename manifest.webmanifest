@@ -1,0 +1,17 @@
+{
+  "name": "Finnish Early Years",
+  "short_name": "Early Years",
+  "description": "Finnish early-childhood method, one child at a time.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14495E",
+  "theme_color": "#14495E",
+  "lang": "bg",
+  "dir": "ltr",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

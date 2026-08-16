@@ -1,0 +1,577 @@
+<title>iPad Readiness Probe</title>
+<style>
+  /* ---- Tokens: complete light palette on bare :root ---- */
+  :root {
+    --ground:      #F5F7F9;
+    --surface:     #FFFFFF;
+    --surface-alt: #EDF1F4;
+    --line:        #D3DCE3;
+    --line-soft:   #E4EAEF;
+    --ink:         #131A21;
+    --ink-muted:   #5A6773;
+    --ink-faint:   #8695A1;
+    --accent:      #1B5E7E;
+    --accent-soft: #E2EEF3;
+    --good:        #2E7D5B;
+    --good-soft:   #E1F0E8;
+    --warn:        #8A5B0E;
+    --warn-soft:   #F7EBD7;
+    --bad:         #A6362C;
+    --bad-soft:    #F7E3E1;
+    --shadow:      0 1px 2px rgba(19,26,33,.06), 0 4px 14px rgba(19,26,33,.05);
+
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --serif: ui-serif, "New York", Georgia, "Times New Roman", serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0D1317;
+      --surface:     #151D23;
+      --surface-alt: #1D272E;
+      --line:        #2C3941;
+      --line-soft:   #222D34;
+      --ink:         #E3EAEF;
+      --ink-muted:   #9CACB8;
+      --ink-faint:   #6E7F8B;
+      --accent:      #6FB4D2;
+      --accent-soft: #17313D;
+      --good:        #6FC49B;
+      --good-soft:   #163024;
+      --warn:        #D9A758;
+      --warn-soft:   #33270F;
+      --bad:         #E4867B;
+      --bad-soft:    #351A17;
+      --shadow:      0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0D1317;
+    --surface:     #151D23;
+    --surface-alt: #1D272E;
+    --line:        #2C3941;
+    --line-soft:   #222D34;
+    --ink:         #E3EAEF;
+    --ink-muted:   #9CACB8;
+    --ink-faint:   #6E7F8B;
+    --accent:      #6FB4D2;
+    --accent-soft: #17313D;
+    --good:        #6FC49B;
+    --good-soft:   #163024;
+    --warn:        #D9A758;
+    --warn-soft:   #33270F;
+    --bad:         #E4867B;
+    --bad-soft:    #351A17;
+    --shadow:      0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+    margin: 0;
+    padding: 32px 20px 80px;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+
+  /* ---- Header ---- */
+  .eyebrow {
+    font-size: 12px; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--ink-faint); font-weight: 600; margin: 0 0 10px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(30px, 6vw, 40px);
+    line-height: 1.12; font-weight: 600; letter-spacing: -.015em;
+    margin: 0 0 12px; text-wrap: balance;
+  }
+  .lede { color: var(--ink-muted); margin: 0; max-width: 60ch; }
+
+  /* ---- Cards ---- */
+  .card {
+    background: var(--surface); border: 1px solid var(--line-soft);
+    border-radius: 10px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .card-head {
+    padding: 16px 20px; border-bottom: 1px solid var(--line-soft);
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .card-head h2 { font-size: 16px; font-weight: 650; margin: 0; letter-spacing: -.005em; }
+  .card-head .note { font-size: 13px; color: var(--ink-faint); }
+  .card-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ---- Verdict ---- */
+  .verdict {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 18px 20px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--surface-alt);
+  }
+  .verdict.is-good { background: var(--good-soft); border-color: var(--good); }
+  .verdict.is-warn { background: var(--warn-soft); border-color: var(--warn); }
+  .verdict.is-bad  { background: var(--bad-soft);  border-color: var(--bad); }
+  .verdict .mark { font-size: 22px; line-height: 1.3; flex: none; }
+  .verdict .txt { display: flex; flex-direction: column; gap: 4px; }
+  .verdict strong { font-size: 16px; font-weight: 650; }
+  .verdict span { font-size: 14px; color: var(--ink-muted); }
+  .verdict.is-good strong { color: var(--good); }
+  .verdict.is-warn strong { color: var(--warn); }
+  .verdict.is-bad  strong { color: var(--bad); }
+
+  /* ---- Buttons ---- */
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  button {
+    font: inherit; font-size: 15px; font-weight: 550;
+    padding: 12px 18px; min-height: 48px;
+    border-radius: 8px; border: 1px solid var(--accent);
+    background: var(--accent); color: var(--surface);
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: opacity .15s ease;
+  }
+  button.ghost { background: transparent; color: var(--accent); }
+  button:active { opacity: .7; }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button[disabled] { opacity: .45; cursor: default; }
+
+  /* ---- Data rows ---- */
+  .rows { display: flex; flex-direction: column; }
+  .row {
+    display: flex; gap: 12px; align-items: baseline; justify-content: space-between;
+    padding: 11px 0; border-bottom: 1px solid var(--line-soft); flex-wrap: wrap;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row .k { font-size: 14px; color: var(--ink-muted); flex: none; }
+  .row .v {
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    text-align: right; word-break: break-word; flex: 1 1 55%; min-width: 0;
+  }
+
+  /* ---- Chips ---- */
+  .chip {
+    display: inline-block; font-family: var(--sans); font-size: 11px; font-weight: 650;
+    letter-spacing: .07em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+  }
+  .chip.good { background: var(--good-soft); color: var(--good); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .chip.bad  { background: var(--bad-soft);  color: var(--bad); }
+  .chip.flat { background: var(--surface-alt); color: var(--ink-muted); }
+
+  /* ---- Voice list ---- */
+  .voices { max-height: 380px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            border: 1px solid var(--line-soft); border-radius: 8px; }
+  .voice {
+    display: flex; gap: 10px; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-bottom: 1px solid var(--line-soft); font-size: 14px;
+  }
+  .voice:last-child { border-bottom: 0; }
+  .voice.hit { background: var(--accent-soft); }
+  .voice .nm { font-weight: 550; }
+  .voice .lg { font-family: var(--mono); font-size: 12px; color: var(--ink-muted); }
+
+  /* ---- Report ---- */
+  textarea {
+    width: 100%; min-height: 220px; font-family: var(--mono); font-size: 12px;
+    line-height: 1.5; padding: 14px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--surface-alt); color: var(--ink);
+    resize: vertical;
+  }
+  .hint { font-size: 13px; color: var(--ink-muted); margin: 0; }
+  code { font-family: var(--mono); font-size: .88em; background: var(--surface-alt);
+         padding: 1px 5px; border-radius: 4px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Finnish Early Years &middot; Build Step 0</p>
+    <h1>iPad Readiness Probe</h1>
+    <p class="lede">
+      Open this on the iPad itself, in Safari. It measures what the device can actually do
+      before any of the app gets written &mdash; above all, whether it can speak Bulgarian aloud.
+      Tap the test buttons, then copy the report at the bottom and send it back.
+    </p>
+  </header>
+
+  <!-- ============ THE DECISIVE QUESTION ============ -->
+  <section class="card">
+    <div class="card-head">
+      <h2>Can this iPad speak Bulgarian?</h2>
+      <span class="note">Decides the whole audio architecture</span>
+    </div>
+    <div class="card-body">
+      <div id="bgVerdict" class="verdict">
+        <span class="mark">&#8943;</span>
+        <span class="txt">
+          <strong>Checking&hellip;</strong>
+          <span>iOS loads its voice list lazily. If this stays blank, tap a test button below.</span>
+        </span>
+      </div>
+
+      <p class="hint">
+        A voice appearing in the list is <em>not</em> proof it works. Tap each button and listen &mdash;
+        that is the only real test. You should hear the Bulgarian for
+        &ldquo;Hello! I am the letter A.&rdquo;
+      </p>
+
+      <div class="btn-row">
+        <button id="testBg">&#9654;&nbsp; Test Bulgarian voice</button>
+        <button id="testBgLang" class="ghost">&#9654;&nbsp; Test <code>lang=bg-BG</code> fallback</button>
+        <button id="testEn" class="ghost">&#9654;&nbsp; Test English voice</button>
+      </div>
+
+      <div class="rows" id="speechRows"></div>
+    </div>
+  </section>
+
+  <!-- ============ VOICES ============ -->
+  <section class="card">
+    <div class="card-head">
+      <h2>Every voice on the device</h2>
+      <span class="note" id="voiceCount">&mdash;</span>
+    </div>
+    <div class="card-body">
+      <div class="voices" id="voiceList"></div>
+      <p class="hint">
+        Highlighted rows are Bulgarian. If there are none, Bulgarian speech has to be
+        pre-recorded or bundled rather than synthesised on the fly.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ DEVICE ============ -->
+  <section class="card">
+    <div class="card-head">
+      <h2>Device &amp; browser</h2>
+      <span class="note">Sets the feature baseline</span>
+    </div>
+    <div class="card-body"><div class="rows" id="deviceRows"></div></div>
+  </section>
+
+  <!-- ============ PWA ============ -->
+  <section class="card">
+    <div class="card-head">
+      <h2>Offline &amp; install capability</h2>
+      <span class="note">Whether it can live on the home screen</span>
+    </div>
+    <div class="card-body"><div class="rows" id="pwaRows"></div></div>
+  </section>
+
+  <!-- ============ REPORT ============ -->
+  <section class="card">
+    <div class="card-head"><h2>Report</h2></div>
+    <div class="card-body">
+      <p class="hint">Tap <strong>Copy report</strong>, then paste it back into our chat.</p>
+      <div class="btn-row">
+        <button id="copyBtn">Copy report</button>
+        <button id="refreshBtn" class="ghost">Re-scan voices</button>
+      </div>
+      <textarea id="report" readonly spellcheck="false"></textarea>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { voices: [], speechEvents: [] };
+
+  /* ---------- small render helpers ---------- */
+
+  function chip(text, kind) {
+    return '<span class="chip ' + kind + '">' + text + '</span>';
+  }
+
+  function rows(target, items) {
+    $(target).innerHTML = items.map(function (it) {
+      return '<div class="row"><span class="k">' + it[0] +
+             '</span><span class="v">' + it[1] + '</span></div>';
+    }).join('');
+  }
+
+  function setVerdict(kind, mark, title, detail) {
+    var el = $('bgVerdict');
+    el.className = 'verdict ' + kind;
+    el.innerHTML = '<span class="mark">' + mark + '</span><span class="txt">' +
+                   '<strong>' + title + '</strong><span>' + detail + '</span></span>';
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  /* ---------- voices ---------- */
+
+  function bulgarian(list) {
+    return list.filter(function (v) { return /^bg(-|_|$)/i.test(v.lang || ''); });
+  }
+
+  function loadVoices(cb) {
+    var tries = 0;
+    function attempt() {
+      var v = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+      if (v && v.length) { cb(v); return true; }
+      return false;
+    }
+    if (attempt()) { return; }
+    if (window.speechSynthesis && 'onvoiceschanged' in speechSynthesis) {
+      speechSynthesis.onvoiceschanged = function () { attempt(); };
+    }
+    var timer = setInterval(function () {
+      tries++;
+      if (attempt() || tries > 24) { clearInterval(timer); if (tries > 24) cb([]); }
+    }, 250);
+  }
+
+  function renderVoices(list) {
+    state.voices = list;
+    var bg = bulgarian(list);
+
+    $('voiceCount').textContent = list.length
+      ? list.length + ' voices · ' + bg.length + ' Bulgarian'
+      : 'none reported yet';
+
+    if (!list.length) {
+      $('voiceList').innerHTML =
+        '<div class="voice"><span class="nm">No voices reported yet</span>' +
+        '<span class="lg">tap a test button</span></div>';
+    } else {
+      $('voiceList').innerHTML = list.map(function (v) {
+        var hit = /^bg(-|_|$)/i.test(v.lang || '');
+        return '<div class="voice' + (hit ? ' hit' : '') + '">' +
+               '<span class="nm">' + esc(v.name) + '</span>' +
+               '<span class="lg">' + esc(v.lang) +
+               (v.localService ? ' · on-device' : ' · network') + '</span></div>';
+      }).join('');
+    }
+
+    if (!window.speechSynthesis) {
+      setVerdict('is-bad', '✗', 'No speech synthesis at all',
+        'This browser exposes no speechSynthesis API. All audio must be pre-recorded files.');
+    } else if (bg.length) {
+      setVerdict('is-good', '✓', bg.length + ' Bulgarian voice' + (bg.length > 1 ? 's' : '') + ' found',
+        esc(bg.map(function (v) { return v.name; }).join(', ')) +
+        ' — now tap the test button and confirm it actually sounds right.');
+    } else if (list.length) {
+      setVerdict('is-warn', '!', 'No Bulgarian voice on this device',
+        list.length + ' voices are installed, none of them Bulgarian. Bulgarian audio will need ' +
+        'to be bundled or recorded. Still tap the fallback test — iOS sometimes speaks a ' +
+        'language it does not list.');
+    } else {
+      setVerdict('is-warn', '⋯', 'Voice list still empty',
+        'iOS often withholds voices until the page has had a real tap. Tap a test button below.');
+    }
+
+    renderSpeechRows();
+    buildReport();
+  }
+
+  /* ---------- speaking ---------- */
+
+  function speak(text, lang, voice, label) {
+    if (!window.speechSynthesis) { note(label, 'no speechSynthesis API'); return; }
+    try {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = lang;
+      u.rate = 0.9;
+      if (voice) { u.voice = voice; }
+      u.onstart = function () { note(label, 'started — listen now'); };
+      u.onend   = function () { note(label, 'finished playing'); };
+      u.onerror = function (e) { note(label, 'ERROR: ' + (e.error || 'unknown')); };
+      speechSynthesis.speak(u);
+      note(label, 'requested (' + lang + (voice ? ' via ' + voice.name : ' — no explicit voice') + ')');
+    } catch (err) {
+      note(label, 'threw: ' + err.message);
+    }
+    // A tap often unlocks the voice list on iOS.
+    loadVoices(renderVoices);
+  }
+
+  function note(label, msg) {
+    state.speechEvents.push(label + ': ' + msg);
+    if (state.speechEvents.length > 12) { state.speechEvents.shift(); }
+    renderSpeechRows();
+    buildReport();
+  }
+
+  function renderSpeechRows() {
+    if (!state.speechEvents.length) { $('speechRows').innerHTML = ''; return; }
+    rows('speechRows', state.speechEvents.map(function (e) {
+      var i = e.indexOf(': ');
+      var ok = /finished playing|started/.test(e);
+      var bad = /ERROR|threw|no speechSynthesis/.test(e);
+      return [
+        e.slice(0, i),
+        (bad ? chip('problem', 'bad') : ok ? chip('ok', 'good') : chip('sent', 'flat')) +
+        ' <span style="margin-left:8px">' + esc(e.slice(i + 2)) + '</span>'
+      ];
+    }));
+  }
+
+  var BG_TEXT = 'Здравей! Аз съм ' +
+                'буквата А.';
+  var EN_TEXT = 'Hello! I am the letter A.';
+
+  $('testBg').addEventListener('click', function () {
+    var bg = bulgarian(state.voices);
+    speak(BG_TEXT, 'bg-BG', bg[0] || null, 'Bulgarian (explicit voice)');
+  });
+  $('testBgLang').addEventListener('click', function () {
+    speak(BG_TEXT, 'bg-BG', null, 'Bulgarian (lang only)');
+  });
+  $('testEn').addEventListener('click', function () {
+    var en = state.voices.filter(function (v) { return /^en(-|_|$)/i.test(v.lang || ''); });
+    speak(EN_TEXT, 'en-GB', en[0] || null, 'English');
+  });
+  $('refreshBtn').addEventListener('click', function () { loadVoices(renderVoices); });
+
+  /* ---------- device + pwa ---------- */
+
+  function yes(v) { return v ? chip('yes', 'good') : chip('no', 'bad'); }
+
+  function renderDevice() {
+    var nav = window.navigator;
+    rows('deviceRows', [
+      ['User agent', esc(nav.userAgent)],
+      ['Platform', esc(nav.platform || 'n/a') + ' &middot; ' + (nav.maxTouchPoints || 0) + ' touch points'],
+      ['Screen', screen.width + ' × ' + screen.height +
+                 ' @ ' + (window.devicePixelRatio || 1) + '×'],
+      ['Viewport', window.innerWidth + ' × ' + window.innerHeight],
+      ['Languages', esc((nav.languages || [nav.language]).join(', '))],
+      ['CPU cores', (nav.hardwareConcurrency || 'not reported')],
+      ['Device memory', (nav.deviceMemory ? nav.deviceMemory + ' GB' : 'not reported')],
+      ['Reduced motion', matchMedia('(prefers-reduced-motion: reduce)').matches ? 'on' : 'off'],
+      ['Colour scheme', matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light']
+    ]);
+  }
+
+  function renderPwa() {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                     window.navigator.standalone === true;
+    var items = [
+      ['Service workers', yes('serviceWorker' in navigator)],
+      ['IndexedDB', yes('indexedDB' in window)],
+      ['localStorage', yes((function () {
+        try { localStorage.setItem('_p', '1'); localStorage.removeItem('_p'); return true; }
+        catch (e) { return false; } })())],
+      ['Cache API', yes('caches' in window)],
+      ['Secure context', yes(window.isSecureContext)],
+      ['Running installed', standalone ? chip('yes — from home screen', 'good')
+                                       : chip('no — in a browser tab', 'flat')],
+      ['Web Audio', yes(!!(window.AudioContext || window.webkitAudioContext))],
+      ['Media recording', yes(!!(navigator.mediaDevices && window.MediaRecorder))],
+      ['Vibration', yes('vibrate' in navigator)],
+      ['Storage quota', '<span id="quota">measuring…</span>']
+    ];
+    rows('pwaRows', items);
+
+    if (navigator.storage && navigator.storage.estimate) {
+      navigator.storage.estimate().then(function (e) {
+        var q = $('quota');
+        if (!q) { return; }
+        var mb = function (b) { return (b / 1048576).toFixed(1) + ' MB'; };
+        q.textContent = mb(e.usage || 0) + ' used of ' + mb(e.quota || 0);
+        buildReport();
+      })["catch"](function () {
+        var q = $('quota'); if (q) { q.textContent = 'unavailable'; }
+      });
+    } else {
+      var q = $('quota'); if (q) { q.textContent = 'API not supported'; }
+    }
+  }
+
+  /* ---------- report ---------- */
+
+  function buildReport() {
+    var nav = window.navigator;
+    var bg = bulgarian(state.voices);
+    var standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                     nav.standalone === true;
+    var quotaEl = $('quota');
+
+    var lines = [
+      '=== iPad Readiness Probe ===',
+      '',
+      '-- Decisive --',
+      'Bulgarian voices found : ' + bg.length,
+      bg.length ? 'Bulgarian voice names : ' + bg.map(function (v) {
+        return v.name + ' (' + v.lang + ', ' + (v.localService ? 'on-device' : 'network') + ')';
+      }).join(' | ') : 'Bulgarian voice names : NONE',
+      'Total voices           : ' + state.voices.length,
+      '',
+      '-- Speech test log --',
+      state.speechEvents.length ? state.speechEvents.join('\n') : '(no tests run yet)',
+      '',
+      '-- Device --',
+      'UA          : ' + nav.userAgent,
+      'Platform    : ' + (nav.platform || 'n/a'),
+      'Touch pts   : ' + (nav.maxTouchPoints || 0),
+      'Screen      : ' + screen.width + 'x' + screen.height + ' @' + (window.devicePixelRatio || 1) + 'x',
+      'Viewport    : ' + window.innerWidth + 'x' + window.innerHeight,
+      'Languages   : ' + (nav.languages || [nav.language]).join(', '),
+      'CPU cores   : ' + (nav.hardwareConcurrency || 'n/r'),
+      '',
+      '-- Capability --',
+      'serviceWorker : ' + ('serviceWorker' in navigator),
+      'indexedDB     : ' + ('indexedDB' in window),
+      'caches        : ' + ('caches' in window),
+      'secureContext : ' + window.isSecureContext,
+      'installed     : ' + standalone,
+      'WebAudio      : ' + !!(window.AudioContext || window.webkitAudioContext),
+      'MediaRecorder : ' + !!(navigator.mediaDevices && window.MediaRecorder),
+      'storage       : ' + (quotaEl ? quotaEl.textContent : 'n/a'),
+      '',
+      '-- All voices --'
+    ];
+
+    if (state.voices.length) {
+      state.voices.forEach(function (v) {
+        lines.push('  ' + v.lang + '  ' + v.name + (v.localService ? '  [on-device]' : '  [network]'));
+      });
+    } else {
+      lines.push('  (none reported)');
+    }
+
+    $('report').value = lines.join('\n');
+  }
+
+  $('copyBtn').addEventListener('click', function () {
+    var ta = $('report');
+    var done = function () {
+      var b = $('copyBtn');
+      b.textContent = 'Copied ✓';
+      setTimeout(function () { b.textContent = 'Copy report'; }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ta.value).then(done)["catch"](function () {
+        ta.removeAttribute('readonly'); ta.select(); document.execCommand('copy');
+        ta.setAttribute('readonly', ''); done();
+      });
+    } else {
+      ta.removeAttribute('readonly'); ta.select(); document.execCommand('copy');
+      ta.setAttribute('readonly', ''); done();
+    }
+  });
+
+  /* ---------- go ---------- */
+  renderDevice();
+  renderPwa();
+  renderVoices([]);
+  loadVoices(renderVoices);
+})();
+</script>

@@ -1,0 +1,13 @@
+# Nothing about the child goes into version control. (DECISIONS.md D5.)
+# The app writes only to on-device IndexedDB, so the risk here is a backup file
+# saved into the project folder by accident — which is a full record of a named
+# four-year-old, and would be published the moment the repo is.
+early-years-*.json
+*.backup.json
+/backups/
+
+# The archived curriculum PDF is a public government regulation and is meant to
+# be committed — it is the project's ground truth. Do not add it here.
+
+.DS_Store
+Thumbs.db
