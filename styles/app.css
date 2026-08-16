@@ -283,7 +283,13 @@ hr { border: 0; border-top: 1px solid var(--line-soft); margin: 4px 0; }
   gap: 16px;
 }
 
-#play-stage { flex: 1; display: flex; flex-direction: column; gap: 18px; justify-content: center; }
+/* The iPad is 768 wide, so at 760 the tablet layout is untouched. On a laptop
+   this stops the cards stretching into 400px-wide letterboxes with a small
+   emoji adrift in the middle. */
+#play-stage {
+  flex: 1; width: 100%; max-width: 760px; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 18px; justify-content: center;
+}
 
 .play-exit { align-self: center; min-width: 160px; opacity: .55; font-size: 15px; }
 
@@ -328,7 +334,15 @@ hr { border: 0; border-top: 1px solid var(--line-soft); margin: 4px 0; }
 /* ---- cards ---- */
 
 .play-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.play-cards-4 { grid-template-columns: repeat(2, 1fr); }
+
+/* Four cards sit 2×2, which stretches each one flat unless the grid is
+   narrowed. Capped so a card keeps roughly the same shape as in the 3-card
+   games — a tap target that changes proportion between games reads as a
+   different control. */
+.play-cards-4 {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 540px; margin: 0 auto; width: 100%;
+}
 
 .play-card {
   background: var(--surface); border: 3px solid var(--line-soft);

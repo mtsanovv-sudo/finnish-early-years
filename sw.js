@@ -16,7 +16,7 @@
  * change without bumping it, devices that already installed the app keep
  * serving the old copy and there is no user-visible symptom to warn you.
  */
-const CACHE = 'fey-v4';
+const CACHE = 'fey-v6';
 
 const PRECACHE = [
   './',
